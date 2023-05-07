@@ -1,4 +1,5 @@
 from datetime import datetime
+from random import choices
 
 
 class Contract:
@@ -6,6 +7,9 @@ class Contract:
         self.probability_of_win: float = pwin
         self.value: float = value
         self.award_date: datetime = award_date
+
+    def predict_win(self, num_its: int) -> list[float]:
+        return choices([self.value, 0.0], cum_weights=[self.probability_of_win, 1.0], k=num_its)
 
     @classmethod
     def from_csv_line(cls, line: str) -> "Contract":
@@ -42,3 +46,11 @@ class RevenuePlan:
             plan.contracts.append(Contract.from_csv_line(line))
 
         return plan
+
+    def predict_revenue(self, num_its: int) -> list[float]:
+        sims: list[float] = [0 for _ in range(num_its)]
+        for ct in self.contracts:
+            for i, val in enumerate(ct.predict_win(num_its)):
+                sims[i] += val
+
+        return sims
