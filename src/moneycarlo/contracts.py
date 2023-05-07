@@ -24,3 +24,21 @@ class Contract:
 
         val: float = float(contents[3])
         return cls(pwin, val, datetime(year, month, 1))
+
+
+class RevenuePlan:
+    def __init__(self) -> None:
+        self.contracts: list[Contract] = []
+
+    @classmethod
+    def from_csv(cls, contracts_csv_name: str) -> "RevenuePlan":
+
+        plan: RevenuePlan = cls()
+
+        with open(contracts_csv_name, "r") as f:
+            lines = f.readlines()
+
+        for line in lines[1:]:
+            plan.contracts.append(Contract.from_csv_line(line))
+
+        return plan
