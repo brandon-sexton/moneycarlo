@@ -33,6 +33,7 @@ class Contract:
 class RevenuePlan:
     def __init__(self) -> None:
         self.contracts: list[Contract] = []
+        self.quarters: dict = {}
 
     @classmethod
     def from_csv(cls, contracts_csv_name: str) -> "RevenuePlan":
@@ -43,14 +44,18 @@ class RevenuePlan:
             lines = f.readlines()
 
         for line in lines[1:]:
-            plan.contracts.append(Contract.from_csv_line(line))
+            plan.add_contract(Contract.from_csv_line(line))
 
         return plan
+
+    def add_contract(self, ct: Contract) -> None:
+        self.contracts.append(ct)
+        if self.quarters.get(ct.award_date) is None:
+            self.quarters[ct.award_date] = 0
 
     def predict_revenue(self, num_its: int) -> list[float]:
         sims: list[float] = [0 for _ in range(num_its)]
         for ct in self.contracts:
             for i, val in enumerate(ct.predict_win(num_its)):
                 sims[i] += val
-
         return sims
